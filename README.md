@@ -25,6 +25,15 @@
 
 ## Histórico de Atualizações (Changelog)
 
+### `25/11/2026` — Conexão DMA/Build Ultra-Rápida & Box `Makcu` em Configs
+- **Aceleração completa de conexão DMA e detecção de build (`b3889`, etc.) — Back-End e Front-End**:
+  - **Busca em 1 tentativa**: `TryConnectDMA` agora tenta primeiro o último build salvo em `auto_builds.cfg` (ou `b3889`) e, caso diferente, enumera todos os processos em RAM numa única chamada (`VMMDLL_ProcessGetInformationAll`), eliminando as 8–11 sondagens sequenciais antigas.
+  - **Scanner em passagem única (15×–25× menos tráfego DMA)**: substituiu as 8–11 varreduras separadas de `64 MB` em `ResolveOffsets` (que incluíam 3 varreduras mortas de veículos e até 4 varreduras redundantes de data de build, somando `512–704 MB` por abertura) por uma única varredura com 1 handle scatter reutilizável que resolve `World`, `Replay`, `Viewport`, `Camera` e `LocalPlayer` de uma só vez com parada antecipada.
+  - **Inicialização em paralelo**: `Makcu` (`0x01F580`) e `DMA Keyboard` (`0x001CD0`, que podia levar 5–20s em `csrss.exe`/PDB) agora rodam em threads assíncronas dedicadas sem travar o status.
+  - **Front-End instantâneo**: o painel marca `DMA: connected` e exibe o build (`b3889`) imediatamente após o scan do FiveM (sem esperar Makcu/Keyboard/WebSocket) e mostra `connecting...` no cartão `Status` enquanto inicializa.
+- **Nova Box `Makcu` em `Configs → General`**:
+  - Cartão dedicado com ícone vetorial de mouse, status ao vivo (`connected` / `connecting...` / `not connected`), porta COM e versão de firmware (`Device`), botão **`Connect Makcu` / `Disconnect Makcu`** e auto-conexão assíncrona na abertura usando o driver serial nativo CH343/CH340 (4 Mbaud, `km.buttons(1)` + `km.version()`), com desconexão limpa da porta COM no `Unload` / `Reload`.
+
 ### `25/11/2026` — Pipeline de Encerramento Blindado (4 Etapas), Correção do Auto-Updater & Ajuste do `Reload Static`
 - **Encerramento completo reescrito em 4 etapas seguras (`0x081D0D` e `0x0A84C0`)**:
   1. **Sinalização paralela & WebSocket (`0x081D0D` / `0x09EB60`)**: ativa atomicamente `0x1B1172 = 1`, cancela imediatamente o Auto-Updater (fechando a sessão WinHTTP ativa), oculta a janela do overlay no instante do clique (`SW_HIDE`), sinaliza todas as flags de worker e condition variables de uma vez, envia close frame RFC 6455 (`1000`), chama `shutdown(SD_BOTH)` + `closesocket` em clientes e listener e aguarda a thread do WebSocket com timeout limitado (`1,5s`), sem travamento ou `__debugbreak()`.
