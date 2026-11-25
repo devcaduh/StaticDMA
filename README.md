@@ -25,6 +25,17 @@
 
 ## Histórico de Atualizações (Changelog)
 
+### `25/11/2026` — Pipeline de Encerramento Blindado (4 Etapas), Correção do Auto-Updater & Ajuste do `Reload Static`
+- **Encerramento completo reescrito em 4 etapas seguras (`0x081D0D` e `0x0A84C0`)**:
+  1. **Sinalização paralela & WebSocket (`0x081D0D` / `0x09EB60`)**: ativa atomicamente `0x1B1172 = 1`, cancela imediatamente o Auto-Updater (fechando a sessão WinHTTP ativa), oculta a janela do overlay no instante do clique (`SW_HIDE`), sinaliza todas as flags de worker e condition variables de uma vez, envia close frame RFC 6455 (`1000`), chama `shutdown(SD_BOTH)` + `closesocket` em clientes e listener e aguarda a thread do WebSocket com timeout limitado (`1,5s`), sem travamento ou `__debugbreak()`.
+  2. **Threads em segundo plano (`0x081D6A..0x081EA7` / `0x00F680`)**: aguarda de forma independente e com timeout seguro as threads assíncronas de inicialização DMA/FiveM, Auto-Updater, DMA Keyboard e todas as 4 threads do subsistema ESP (corrigindo o retorno prematuro de `0x00F680`), encerrando e zerando ambos os handles de scatter DMA (`0x1B13F0` e `0x1B16C0`).
+  3. **Reversão blindada de patches em memória (`0x03C8D0` / `0x03D1E0`)**: valida handle DMA e PID antes de reverter `SET_ENTITY_HEALTH` e `Anti-ESP Bypass`, executa até 3 tentativas em caso de falha transitória de barramento e limpa consistentemente todas as flags de estado.
+  4. **DirectX 11, ImGui e liberação atômica da placa DMA (`0x080740` / `0x0A84C0`)**: corrigida a ordem de liberação (ImGui primeiro com validação de ponteiros nulos e eliminação de double-destroy no renderer auxiliar → `ClearState()` + `Flush()` + `Release()` na ordem reversa `RTV → SwapChain → DeviceContext → Device` → `DestroyWindow`/`UnregisterClassA` → `VMMDLL_Close` atômico e idempotente que nunca fecha handle nulo nem fecha duas vezes no `atexit`).
+- **Correção definitiva do congelamento em 96% (`free-river.exe.old` não respondendo)**:
+  - Corrigida falha de acesso (`0xC0000005` em `0x03712C`) no `atexit` legado de veículos (`0x001830` / `0x0A8F10`), que travava o processo ao encerrar ou reiniciar pelo Auto-Updater.
+  - O Auto-Updater agora respeita imediatamente o clique em `Unload Static`, avança até `100%`, executa o encerramento limpo completo antes de reiniciar para `StaticLoader.exe` com `--cleanup-pid` e remove automaticamente quaisquer sobras `.old`/`.new` em segundo plano (além de removido `free-river.exe.bak` da pasta principal).
+- **Ajuste visual em `Configs → Session`**: botão amarelo **`Reload Static`** redimensionado para o tamanho exato de `Unload Static` (`28px` de altura, mesma fonte e proporção), removido o ícone interno e adicionada a descrição dedicada `"Restarts Static and reloads all modules and DMA."` logo acima do botão.
+
 ### `25/11/2026` — Botão `Reload Static` & Changelog Público
 - **Novo botão `Reload Static` (âmbar/amarelo)**: adicionado na seção `Configs → Session` logo acima de `Unload Static`, com ícone vetorial de recarga. Ao clicar, executa o desligamento limpo completo (salva configs, encerra WebSocket e threads, reverte patches ativos, libera DirectX 11/ImGui e fecha a sessão DMA via `VMMDLL_Close`), reinicia automaticamente o `StaticLoader.exe` recarregando todos os módulos do zero e exibe a notificação `"Static recarregado com sucesso!"`.
 - **Changelog público (`devcaduh/StaticDMA`)**: sincronização automática deste `README.md` com o repositório público a cada nova atualização.
