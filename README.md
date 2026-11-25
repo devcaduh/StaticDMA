@@ -2,7 +2,7 @@
 
 # STATIC DMA
 
-**Painel DMA DirectX 11 / ImGui com Auto-Updater nativo, gerenciador de configs nomeadas e detecção automática de versões do FiveM.**
+**Cheat de DMA para FiveM focado para PVP Competitivo.**
 
 ![Platform](https://img.shields.io/badge/Platform-Windows%20x64-E63946?style=for-the-badge)
 ![Theme](https://img.shields.io/badge/Theme-Crimson%20Red-E63946?style=for-the-badge)
@@ -34,7 +34,7 @@
 - **Nova Box `Makcu` em `Configs → General`**:
   - Cartão dedicado com ícone vetorial de mouse, status ao vivo (`connected` / `connecting...` / `not connected`), porta COM e versão de firmware (`Device`), botão **`Connect Makcu` / `Disconnect Makcu`** e auto-conexão assíncrona na abertura usando o driver serial nativo CH343/CH340 (4 Mbaud, `km.buttons(1)` + `km.version()`), com desconexão limpa da porta COM no `Unload` / `Reload`.
 
-### `25/11/2026` — Pipeline de Encerramento Blindado (4 Etapas), Correção do Auto-Updater & Ajuste do `Reload Static`
+### `25/11/2026` — Melhorado o Sistema de Limpar a memória do jogo, Correção do Auto-Updater & Ajuste do `Reload Static`
 - **Encerramento completo reescrito em 4 etapas seguras (`0x081D0D` e `0x0A84C0`)**:
   1. **Sinalização paralela & WebSocket (`0x081D0D` / `0x09EB60`)**: ativa atomicamente `0x1B1172 = 1`, cancela imediatamente o Auto-Updater (fechando a sessão WinHTTP ativa), oculta a janela do overlay no instante do clique (`SW_HIDE`), sinaliza todas as flags de worker e condition variables de uma vez, envia close frame RFC 6455 (`1000`), chama `shutdown(SD_BOTH)` + `closesocket` em clientes e listener e aguarda a thread do WebSocket com timeout limitado (`1,5s`), sem travamento ou `__debugbreak()`.
   2. **Threads em segundo plano (`0x081D6A..0x081EA7` / `0x00F680`)**: aguarda de forma independente e com timeout seguro as threads assíncronas de inicialização DMA/FiveM, Auto-Updater, DMA Keyboard e todas as 4 threads do subsistema ESP (corrigindo o retorno prematuro de `0x00F680`), encerrando e zerando ambos os handles de scatter DMA (`0x1B13F0` e `0x1B16C0`).
@@ -75,7 +75,7 @@
 
 ### `25/11/2026` — Redesign Completo STATIC (Tema Vermelho, Ícones e Crosshair)
 - **Tema Vermelho (`#E63946`)**: substituição completa da paleta azul em todas as abas, toggles, checkboxes, sliders, botões, seletores e indicador de FPS (`0` pixels azuis residuais).
-- **Rebranding `RIVER` → `STATIC`**: atualizados cabeçalho, emblema principal, janela, rodapé e textos da aba `Session` (`Unload Static`).
+- **Rebranding**: atualizados cabeçalho, emblema principal, janela, rodapé e textos da aba `Session` (`Unload Static`).
 - **Ícones Vetoriais Redesenhados**: todos os 15 ícones de abas e cartões e o emblema do topo refeitos com proporção e traço uniformes.
 - **Remoção da Crosshair Roxa**: removida a mira fixa roxa central em `RenderFrame`.
 
