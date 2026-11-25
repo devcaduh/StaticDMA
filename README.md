@@ -25,6 +25,12 @@
 
 ## Histórico de Atualizações (Changelog)
 
+### `25/11/2026` — Remoção Completa de `SET_ENTITY_HEALTH` (`[ElectronBypass]`) & Layout Balanceado em `Misc → Exploits`
+- **Remoção completa de `SET_ENTITY_HEALTH` / `[ElectronBypass]` (UI + Backend + Shutdown)**:
+  - Removido o cartão `SET_ENTITY_HEALTH` da aba `Misc → Exploits` e reconstruída a página (`0x091A70`) em 2 colunas balanceadas (**`Anti-ESP Bypass`** à esquerda e **`Render / VSync`** à direita, sem coluna vazia).
+  - Neutralizadas com retorno imediato (`xor eax, eax; ret`) todas as rotinas de backend do módulo (`0x03C6B0` aplicação, `0x03C8D0` reversão e `0x03C090` logger de status), bloqueando inclusive ativações via WebSocket ou configs antigos.
+  - Flags globais `0x1B115A` e `0x1B115B` forçadas permanentemente para `0` em `enforce_disabled_features()` e removida a rotina de reversão correspondente do pipeline de encerramento.
+
 ### `25/11/2026` — Conexão DMA/Build Ultra-Rápida & Box `Makcu` em Configs
 - **Aceleração completa de conexão DMA e detecção de build (`b3889`, etc.) — Back-End e Front-End**:
   - **Busca em 1 tentativa**: `TryConnectDMA` agora tenta primeiro o último build salvo em `auto_builds.cfg` (ou `b3889`) e, caso diferente, enumera todos os processos em RAM numa única chamada (`VMMDLL_ProcessGetInformationAll`), eliminando as 8–11 sondagens sequenciais antigas.
