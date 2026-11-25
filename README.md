@@ -40,9 +40,9 @@
   2. **Threads em segundo plano (`0x081D6A..0x081EA7` / `0x00F680`)**: aguarda de forma independente e com timeout seguro as threads assíncronas de inicialização DMA/FiveM, Auto-Updater, DMA Keyboard e todas as 4 threads do subsistema ESP (corrigindo o retorno prematuro de `0x00F680`), encerrando e zerando ambos os handles de scatter DMA (`0x1B13F0` e `0x1B16C0`).
   3. **Reversão blindada de patches em memória (`0x03C8D0` / `0x03D1E0`)**: valida handle DMA e PID antes de reverter `SET_ENTITY_HEALTH` e `Anti-ESP Bypass`, executa até 3 tentativas em caso de falha transitória de barramento e limpa consistentemente todas as flags de estado.
   4. **DirectX 11, ImGui e liberação atômica da placa DMA (`0x080740` / `0x0A84C0`)**: corrigida a ordem de liberação (ImGui primeiro com validação de ponteiros nulos e eliminação de double-destroy no renderer auxiliar → `ClearState()` + `Flush()` + `Release()` na ordem reversa `RTV → SwapChain → DeviceContext → Device` → `DestroyWindow`/`UnregisterClassA` → `VMMDLL_Close` atômico e idempotente que nunca fecha handle nulo nem fecha duas vezes no `atexit`).
-- **Correção definitiva do congelamento em 96% (`free-river.exe.old` não respondendo)**:
+- **Correção definitiva do congelamento em 96% (`StaticLoader.exe.old` não respondendo)**:
   - Corrigida falha de acesso (`0xC0000005` em `0x03712C`) no `atexit` legado de veículos (`0x001830` / `0x0A8F10`), que travava o processo ao encerrar ou reiniciar pelo Auto-Updater.
-  - O Auto-Updater agora respeita imediatamente o clique em `Unload Static`, avança até `100%`, executa o encerramento limpo completo antes de reiniciar para `StaticLoader.exe` com `--cleanup-pid` e remove automaticamente quaisquer sobras `.old`/`.new` em segundo plano (além de removido `free-river.exe.bak` da pasta principal).
+  - O Auto-Updater agora respeita imediatamente o clique em `Unload Static`, avança até `100%`, executa o encerramento limpo completo antes de reiniciar para `StaticLoader.exe` com `--cleanup-pid` e remove automaticamente quaisquer sobras `.old`/`.new` em segundo plano (além de removido `StaticLoader.exe.bak` da pasta principal).
 - **Ajuste visual em `Configs → Session`**: botão amarelo **`Reload Static`** redimensionado para o tamanho exato de `Unload Static` (`28px` de altura, mesma fonte e proporção), removido o ícone interno e adicionada a descrição dedicada `"Restarts Static and reloads all modules and DMA."` logo acima do botão.
 
 ### `25/11/2026` — Botão `Reload Static` & Changelog Público
@@ -50,7 +50,6 @@
 - **Changelog público (`devcaduh/StaticDMA`)**: sincronização automática deste `README.md` com o repositório público a cada nova atualização.
 
 ### `25/11/2026` — Static DMA & `StaticLoader.exe`
-- **Renomeação no Auto-Update**: ao atualizar, o aplicativo migra automaticamente de `free-river.exe` para **`StaticLoader.exe`**, removendo o arquivo legado `.old` na reinicialização.
 - **Rodapé atualizado**: alterado o texto do rodapé de `Static v2.0` para **`Static DMA`** (tanto no painel principal quanto na tela de atualização).
 - **Documentação**: adicionado este `README.md` com o histórico completo de modificações por data.
 
